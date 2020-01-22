@@ -1,8 +1,11 @@
 <template>
   <div class="about">
-    <h1>This is an about page</h1>
+    <!-- <h1>Your current Track</h1>
+    <h1>--</h1> -->
+    <h1>{{this.cur.name}}</h1>
+    <h2>By</h2>
+    <h1>{{this.cur.artists[0].name}}</h1>
     <button @click="getCurTrack">refresh</button>
-    <h1>{{this.cur}}</h1>
   </div>
 </template>
 
@@ -30,11 +33,10 @@ export default {
       const self = this;
       const config = {
         headers: {
-          'Access-Control-Allow-Origin': '*',
-            Authorization: `Bearer ` + self.token
+          Authorization: `Bearer ` + self.token
         }
       };
-      axios.get("https://api.spotify.com/v1/me/player", config).then(function(response){console.log(response); self.cur = response.data.item.name})
+      axios.get("https://api.spotify.com/v1/me/player", config).then(function(response){console.log(response); self.cur = response.data.item})
     },
     getUrlVars(url) {
       var hash;
