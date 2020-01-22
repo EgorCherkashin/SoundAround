@@ -1,11 +1,15 @@
 <template>
   <div class="about">
-    <!-- <h1>Your current Track</h1>
-    <h1>--</h1> -->
+    <h1>This is an about page</h1>
+    <button @click="getCurTrack">refresh</button>
     <h1>{{this.cur.name}}</h1>
     <h2>By</h2>
-    <h1>{{this.cur.artists[0].name}}</h1>
-    <button @click="getCurTrack">refresh</button>
+    <h1 v-for="item in cur.artists" :key=item>{{item.name}}</h1>
+    <h2><i>Available Devices</i></h2>
+    <h3 v-for="index in devices" :key=index>{{ index.name }}  : <i>{{index.is_active}}</i></h3>
+    <button @click="pause">Pause</button>
+    <button @click="play">Play</button>
+    <!-- <h2>{{this.devices[1].name}}</h2> -->
   </div>
 </template>
 
@@ -15,7 +19,8 @@ export default {
   data(){
     return{
       token: '',
-      cur: ""
+      cur: "",
+      devices: ""
     }
   },
   mounted(){
@@ -25,6 +30,7 @@ export default {
     // console.log(this.$route.fullPath)
     this.token = this.getUrlVars(this.$route.fullPath)["access_token"];
     console.log(this.token)
+    this.getDevices();
     this.getCurTrack();
     // console.log(this.$route)
   },
@@ -33,10 +39,51 @@ export default {
       const self = this;
       const config = {
         headers: {
-          Authorization: `Bearer ` + self.token
+          'Access-Control-Allow-Origin': '*',
+            Authorization: `Bearer ` + self.token
         }
       };
-      axios.get("https://api.spotify.com/v1/me/player", config).then(function(response){console.log(response); self.cur = response.data.item})
+      axios.get("https://api.spotify.com/v1/me/player", config).then(function(response){console.log(response); self.cur = response.data.item; console.log(self.devices)})
+    },
+    pause(){
+      let f = this.getActivePlayerId()
+      const data = {
+        id: f
+      };
+      console.log(data)
+      const self = this;
+      const config = {
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+            Authorization: `Bearer ` + self.token
+        }
+      };
+    axios.put("https://api.spotify.com/v1/me/player/pause", data, config).then(function(response){console.log(response)})
+    },
+    play(){
+      let f = this.getActivePlayerId()
+      const data = {
+        id: f
+      };
+      console.log(data)
+      const self = this;
+      const config = {
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+            Authorization: `Bearer ` + self.token
+        }
+      };
+    axios.put("https://api.spotify.com/v1/me/player/play", data, config).then(function(response){console.log(response)})
+    },
+    getDevices(){
+      const self = this;
+      const config = {
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+            Authorization: `Bearer ` + self.token
+        }
+      };
+      axios.get("https://api.spotify.com/v1/me/player/devices", config).then(function(response){console.log(response); self.devices = response.data.devices})
     },
     getUrlVars(url) {
       var hash;
@@ -50,6 +97,15 @@ export default {
       }
       console.log(myJson)
       return myJson;
+    },
+    getActivePlayerId(){
+      let i = 0;
+      for(i; i < this.devices.length; i++){
+        if(this.devices[i].is_active == true){
+          console.log(this.devices[i].id)
+          return this.devices[i].id;
+        }
+      }
     }
 
   }
